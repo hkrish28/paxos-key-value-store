@@ -1,0 +1,21 @@
+PUT 5 2
+GET 5
+DELETE 3
+PUT 3 tidy
+PUT 1 frown
+DELETE 5
+GET 5
+PUT one boston
+PUT two seattle
+GET two
+GET one
+DELETE two
+DELETE two
+DELETE 3
+DELETE one
+PUT one boston
+PUT two seattle
+PUT 3 tidy
+PUT 5 2
+
+
