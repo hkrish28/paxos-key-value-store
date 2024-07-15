@@ -24,6 +24,7 @@ public class ServerImpl implements CoordinatedServer, Serializable {
   public ServerImpl(Coordinator coordinator, int port){
      this.coordinator = coordinator;
      this.port = port;
+     log("Server started at port:" + port);
   }
 
   /**
@@ -120,19 +121,28 @@ public class ServerImpl implements CoordinatedServer, Serializable {
   }
 
   @Override
-  public void doCommit(String key) {
-    backup.remove(key);
-    log("Server committed in port:" + port + " for key:" + key + " current value:" + mapStore.get(key));
+  public boolean doCommit(String key) {
+    try {
+      backup.remove(key);
+      log("Server committed in port:" + port + " for key:" + key + " current value:" + mapStore.get(key));
+      return true;
+    } catch (RuntimeException e){
+      log("Error encountered during execution: " + e.getMessage());
+      return false;
+    }
   }
 
   @Override
-  public void doAbort(String key) {
-    mapStore.put(key, backup.get(key));
-    backup.remove(key);
-    log("Server aborted in port:" + port + " for key:" + key + " current value:" + mapStore.get(key));
+  public boolean doAbort(String key) {
+    try{
+      mapStore.put(key, backup.get(key));
+      backup.remove(key);
+      log("Server aborted in port:" + port + " for key:" + key + " current value:" + mapStore.get(key));
+      return true;
+    } catch (RuntimeException e){
+      log("Error encountered during execution: " + e.getMessage());
+      return false;
+    }
   }
 
-  public int getPort() {
-    return port;
-  }
 }

@@ -34,7 +34,15 @@ public class ServerApp {
       serverPorts = Arrays.asList(5000, 5001, 5002, 5003, 5004, 5005);
 
     Coordinator coordinator = new CoordinatorImpl(serverPorts);
-    new ServerOperator(coordinator).start();
+    ServerOperator serverOperator = new ServerOperator(coordinator);
+    serverOperator.start();
+    try {
+      serverOperator.join(); // Wait for ServerOperator to complete
+    } catch (InterruptedException e) {
+      System.out.println("Main thread interrupted while waiting for server operator to close.");
+    }
+    System.out.println("Main thread exiting");
+    System.exit(0);
     }
 
 }

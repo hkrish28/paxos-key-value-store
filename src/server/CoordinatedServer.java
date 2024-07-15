@@ -1,16 +1,16 @@
 package server;
 
+import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public interface CoordinatedServer extends Server {
 
-  public boolean canCommit(String key, Consumer<Map<String,String>> storeOperation);
+  boolean canCommit(String key, Consumer<Map<String, String>> storeOperation) throws RemoteException;
 
-  public void doCommit(String key);
+  boolean doCommit(String key) throws RemoteException;
 
-  public void doAbort(String key);
+  boolean doAbort(String key) throws RemoteException;
 
-  public int getPort();
 
 }

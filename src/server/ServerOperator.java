@@ -24,5 +24,6 @@ public class ServerOperator extends Thread {
       }
     }
     coordinator.shutdown();
+    System.out.println("Coordinator closed");
   }
 }

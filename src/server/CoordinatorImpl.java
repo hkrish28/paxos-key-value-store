@@ -19,10 +19,10 @@ public class CoordinatorImpl implements Coordinator {
   private List<CoordinatedServer> servers = new ArrayList<>();
   private List<Server> stubs = new ArrayList<>();
 
+  private List<Integer> serverPorts;
   //TODO: try removing stub
   public CoordinatorImpl(List<Integer> serverPorts) throws IllegalStateException {
     serverCount = serverPorts.size();
-
     for (int i = 0; i < serverCount; i++) {
       int retryCount = 1;
       int retryMax = 5;
@@ -30,7 +30,7 @@ public class CoordinatorImpl implements Coordinator {
         try {
           Registry registry = LocateRegistry.createRegistry(serverPorts.get(i));
           retryCount = retryMax + 2;
-          CoordinatedServer obj = new ServerImpl(this, i);
+          CoordinatedServer obj = new ServerImpl(this, serverPorts.get(i));
           Server stub = (Server) UnicastRemoteObject.exportObject(obj, 0);
           stubs.add(stub);
           servers.add(obj);
@@ -48,13 +48,20 @@ public class CoordinatorImpl implements Coordinator {
         throw new IllegalStateException("Server set up failed");
       }
     }
+    this.serverPorts = serverPorts;
   }
 
 
   @Override
   public boolean update(String key, String value) {
     Function<CoordinatedServer, Boolean> phaseOneFunction =
-            server -> server.canCommit(key, store -> store.put(key, value));
+            server -> {
+              try {
+                return server.canCommit(key, store -> store.put(key, value));
+              } catch (RemoteException e) {
+                return false;
+              }
+            };
 
     return proceed2PC(key, phaseOneFunction);
   }
@@ -62,7 +69,13 @@ public class CoordinatorImpl implements Coordinator {
   @Override
   public boolean delete(String key) {
     Function<CoordinatedServer, Boolean> phaseOneFunction =
-            server -> server.canCommit(key, store -> store.remove(key));
+            server -> {
+              try {
+                return server.canCommit(key, store -> store.remove(key));
+              } catch (RemoteException e) {
+                return false;
+              }
+            };
 
 
     return proceed2PC(key, phaseOneFunction);
@@ -74,14 +87,16 @@ public class CoordinatorImpl implements Coordinator {
 
   @Override
   public void shutdown() throws IllegalArgumentException {
-    for(int i = 0; i < serverCount; i++){
+    for (int i = 0; i < serverCount; i++) {
       try {
-        LocateRegistry.getRegistry(servers.get(i).getPort()).unbind("Store");
-        UnicastRemoteObject.unexportObject(stubs.get(i), true);
-      } catch (RemoteException | NotBoundException e){
-        log("Error during server shutdown at port:" + servers.get(i).getPort() + " Error:" + e.getMessage() );
+        Registry registry = LocateRegistry.getRegistry(serverPorts.get(i));
+        registry.unbind("Store");
+
+      } catch (RemoteException | NotBoundException e) {
+        log("Error during server shutdown, server port:" + serverPorts.get(i) + " Error:" + e.getMessage());
       }
     }
+    log("All servers shut down successfully.");
   }
 
 
@@ -106,15 +121,43 @@ public class CoordinatorImpl implements Coordinator {
   }
 
   private boolean phaseTwo(String key, int failedCommit) {
-    Consumer<CoordinatedServer> phaseTwoFunction;
-    phaseTwoFunction = failedCommit == 0 ? server -> server.doCommit(key)
-            : server -> server.doAbort(key);
+    Function<CoordinatedServer, Boolean> phaseTwoFunction;
+    int goAckFail = 0;
+    String operation = failedCommit == 0 ? "commit" : "abort";
+    try {
+      phaseTwoFunction = failedCommit == 0 ? server -> {
+        try {
+          return server.doCommit(key);
+        } catch (RemoteException e) {
+          return false;
+        }
+      }
+              : server -> {
+        try {
+          return server.doAbort(key);
+        } catch (RemoteException e) {
+          return false;
+        }
+      };
 
-    for (int i = 0; i < serverCount; i++) {
-      phaseTwoFunction.accept(servers.get(i));
+      for (int i = 0; i < serverCount; i++) {
+        if(phaseTwoFunction.apply(servers.get(i))){
+          log("Replica:" + i + " acknowledged " + operation);
+        }
+        else{
+          goAckFail++;
+          log("Replica:" + i + "  could not acknowledge " + operation);
+        }
+        if (goAckFail > 0){
+          //rollback would go here. out of scope for this project since assumption is servers do not fail
+          log("Phase two failed");
+        }
+      }
+
+      return failedCommit > 0;
+    } catch (RuntimeException e){
+      return false;
     }
-
-    return failedCommit > 0;
   }
 
   private void log(String message) {

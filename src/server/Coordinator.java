@@ -2,10 +2,10 @@ package server;
 
 public interface Coordinator {
 
-  public void shutdown();
+  void shutdown();
 
-  public boolean update(String key, String value);
+  boolean update(String key, String value);
 
-  public boolean delete(String key);
+  boolean delete(String key);
 
 }
