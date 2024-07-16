@@ -31,7 +31,7 @@ public class ServerApp {
         System.out.println("Invalid port provided. Reverting to defaults...");
       }
     } else
-      serverPorts = Arrays.asList(5000, 5001, 5002, 5003, 5004, 5005);
+      serverPorts = Arrays.asList(5000, 5001, 5002, 5003, 5004);
 
     Coordinator coordinator = new CoordinatorImpl(serverPorts);
     ServerOperator serverOperator = new ServerOperator(coordinator);

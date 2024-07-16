@@ -154,7 +154,7 @@ public class CoordinatorImpl implements Coordinator {
         }
       }
 
-      return failedCommit > 0;
+      return failedCommit == 0;
     } catch (RuntimeException e){
       return false;
     }

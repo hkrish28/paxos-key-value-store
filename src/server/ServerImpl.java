@@ -61,7 +61,7 @@ public class ServerImpl implements CoordinatedServer, Serializable {
     boolean status = coordinator.update(key,value);
 
     String response = status? "Value updated for " + key + " successfully"
-            : "Value updated for " + key + " failed. Please try again.";
+            : "Value update for " + key + " failed. Please try again.";
     logResponse(response);
     return response;
   }
@@ -99,7 +99,7 @@ public class ServerImpl implements CoordinatedServer, Serializable {
    * @param message the message to log
    */
   private void log(String message) {
-    logger.log(message);
+    logger.log("Port:"+ port +":" + message);
   }
 
   /**

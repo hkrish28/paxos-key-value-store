@@ -32,19 +32,23 @@ public class ClientImpl implements Client {
    * @param in the input stream from which to read requests
    */
   @Override
-  public void sendRequests(InputStream in) {
+  public boolean sendRequests(InputStream in) {
     Scanner inputScanner = new Scanner(in);
     while (inputScanner.hasNext()) {
       String inputText = inputScanner.nextLine();
       if (inputText.equalsIgnoreCase("exit")) {
-        System.out.println("Exiting...");
-        return;
+        System.out.println("Stopping client application...");
+        return false;
+      }
+      if (inputText.equalsIgnoreCase("disconnect")){
+        System.out.println("Disconnected from server");
+        return true;
       }
       log("Request to be sent to server - " + inputText);
       dispatchRequest(inputText.split(" "));
       System.out.println("Please enter your command (put, get, delete)");
     }
-
+    return false;
   }
 
   /**

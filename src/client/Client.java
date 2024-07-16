@@ -12,5 +12,5 @@ public interface Client {
    *
    * @param in the input stream from which to read requests
    */
-  void sendRequests(InputStream in);
+  boolean sendRequests(InputStream in);
 }
