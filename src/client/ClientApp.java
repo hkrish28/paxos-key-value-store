@@ -34,6 +34,10 @@ public class ClientApp {
     do {
       if (proceed){
         port = readPort();
+        if (port == 0 ){
+          System.out.println("Exiting the client app...");
+          break;
+        }
       }
       try {
         registry = LocateRegistry.getRegistry(port);
@@ -63,9 +67,15 @@ public class ClientApp {
     }
   }
 
+  /**
+   *  Method to read user input for server port. Invalid entry will result in using the
+   *  default port 5000.
+   * @return port number read from user input
+   */
   private static int readPort(){
+
     try {
-      System.out.println("Enter the port number of the server to connect to");
+      System.out.println("Enter the port number of the server to connect to - or 0 to exit");
       BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       return Integer.parseInt(in.readLine());
     } catch (NumberFormatException | IOException e){

@@ -27,7 +27,7 @@ docker build -t $SERVER_IMAGE --target server-build .
 
 # run the image and open the required ports
 echo "----------Running sever app----------"
-docker run -d -p 1099:1099/tcp --name $SERVER_CONTAINER --network $PROJECT_NETWORK $SERVER_IMAGE
+docker run -d -p 5000:5000 -p 5001:5001 -p 5002:5002 -p 5003:5003 -p 5004:5004 --name $SERVER_CONTAINER --network $PROJECT_NETWORK $SERVER_IMAGE
 
 echo "----------watching logs from server----------"
 docker logs $SERVER_CONTAINER -f

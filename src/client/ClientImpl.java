@@ -46,7 +46,7 @@ public class ClientImpl implements Client {
       }
       log("Request to be sent to server - " + inputText);
       dispatchRequest(inputText.split(" "));
-      System.out.println("Please enter your command (put, get, delete)");
+      System.out.println("Please enter your command (put, get, delete, disconnect, exit)");
     }
     return false;
   }
