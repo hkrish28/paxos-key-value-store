@@ -6,6 +6,11 @@ import java.util.Random;
 
 import shared.Logger;
 
+/**
+ * A runnable implementation that simulates the behavior of an acceptor in the Paxos consensus protocol.
+ * The acceptor thread periodically fails and restarts, simulating network or process failures.
+ * This class is solely for the purposes of demonstrating failure scenario in Paxos Agreement.
+ */
 public class AcceptorRunnable implements Runnable {
 
   private final PaxosServerImpl server;
@@ -17,24 +22,35 @@ public class AcceptorRunnable implements Runnable {
   private static final int MAX_RESTART_DELAY = 5000; // Max delay (in ms) before the thread restarts
 
   private static Logger logger = new Logger(System.out);
+
+  /**
+   * Constructs an AcceptorRunnable with the specified Paxos server.
+   *
+   * @param server the Paxos server implementation associated with this acceptor
+   */
   public AcceptorRunnable(PaxosServerImpl server) {
     this.server = server;
     this.running = new AtomicBoolean(true);
     this.random = new Random();
   }
 
+  /**
+   * Runs the acceptor thread, which simulates normal operation by sleeping for a random interval,
+   * then fails and restarts after a random delay. The thread will continue this cycle while it is running.
+   * It checks for the current number of acceptors that have failed before setting the failed state to
+   * false.
+   */
   @Override
   public void run() {
     while (true) {
       if (running.get()) {
         try {
-          // Check if any other acceptor thread is sleeping
+          // Check the number of failed threads
           synchronized (AcceptorState.class) {
             while (!AcceptorState.canAcceptorSleep()) {
               // Wait if maximum number of acceptors are already sleeping
               AcceptorState.class.wait();
             }
-            // Set state to sleeping
             AcceptorState.setAcceptorSleeping(true);
           }
 
@@ -66,10 +82,20 @@ public class AcceptorRunnable implements Runnable {
     }
   }
 
+  /**
+   * Checks if the acceptor thread is currently running.
+   *
+   * @return true if the acceptor thread is running, false otherwise
+   */
   public boolean isRunning() {
     return running.get();
   }
 
+  /**
+   * Logs a message using the server's logger.
+   *
+   * @param message the message to be logged
+   */
   private void log(String message) {
     logger.log("Port:" + server.port + ":" + message);
   }

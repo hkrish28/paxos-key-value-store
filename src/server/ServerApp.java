@@ -53,6 +53,10 @@ public class ServerApp {
     System.exit(0);
     }
 
+
+  /**
+   * Shuts down the created servers after removing from the registry.
+   */
   private static void serverShutDown() {
     for (int i = 0; i < SERVER_COUNT; i++) {
       try {
@@ -66,6 +70,10 @@ public class ServerApp {
     System.out.println("All servers shut down successfully.");
   }
 
+  /**
+   * Sets up servers and connects them to other servers.
+   * @param serverPorts list of port numbers for the server ports
+   */
   private static void serverSetup(List<Integer> serverPorts){
       for (int i = 0; i < SERVER_COUNT; i++) {
         int retryCount = 1;
@@ -101,6 +109,7 @@ public class ServerApp {
         }
       }
     }
+
 
   private static int getRandomNumber(int min, int max) {
     return (int) ((Math.random() * (max - min)) + min);

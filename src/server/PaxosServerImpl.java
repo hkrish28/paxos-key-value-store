@@ -85,18 +85,6 @@ public class PaxosServerImpl implements PaxosServer, Server {
   }
 
 
-//  @Override
-//  public PreparePromise prepare(long prepareId) {
-//    try {
-//      Future<PreparePromise> preparePromiseFuture = acceptorThread.submit(() -> getPreparePromise(prepareId));
-//
-//      return preparePromiseFuture.get();
-//    } catch (ExecutionException | InterruptedException e){
-//      log("Exception encoountered in server " + port);
-//      return null;
-//    }
-//  }
-
   @Override
   public PreparePromise prepare(long prepareId) {
     if (!acceptorRunnable.isRunning()) {
@@ -136,33 +124,6 @@ public class PaxosServerImpl implements PaxosServer, Server {
 
     return acceptMessage;
   }
-//  @Override
-//  public AcceptMessage accept(long id, Consumer<Map<String, String>> mapConsumer) {
-//    try {
-//      Future<AcceptMessage> acceptMessageFuture = acceptorThread.submit(() -> getAcceptMessage(id, mapConsumer));
-//      return acceptMessageFuture.get();
-//    } catch (ExecutionException | InterruptedException e){
-//    log("Exception encoountered in server " + port);
-//    return null;
-//  }
-//  }
-
-//  private AcceptMessage getAcceptMessage(long id, Consumer<Map<String, String>> mapConsumer) {
-//    if (id < lastPrepared || id < lastAcceptedId)
-//      return null;
-//    lastAcceptedId = id;
-//    lastAcceptedCommand = mapConsumer;
-//    AcceptMessage acceptMessage = new AcceptMessage(id, mapConsumer);
-//    for (PaxosServer server : serverList) {
-//      try {
-//        server.updateLearner(acceptMessage);
-//      } catch (RemoteException e) {
-//        log("Remote exception encountered");
-//      }
-//    }
-//
-//    return acceptMessage;
-//  }
 
   @Override
   public void updateLearner(AcceptMessage message) {
