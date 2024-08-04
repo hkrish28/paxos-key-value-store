@@ -10,17 +10,6 @@ import java.io.InputStreamReader;
  */
 public class ServerOperator extends Thread {
 
-  private Coordinator coordinator;
-
-  /**
-   * Constructs a ServerOperator instance with the specified coordinator.
-   *
-   * @param coordinator the coordinator instance to be controlled by this operator
-   */
-  public ServerOperator(Coordinator coordinator) {
-    this.coordinator = coordinator;
-  }
-
   /**
    * Runs the server operator thread, listening for user input to initiate server shutdown.
    * The server will close when the user inputs "exit".
@@ -36,7 +25,5 @@ public class ServerOperator extends Thread {
         System.out.println("Server Operator Error:" + e.getMessage());
       }
     }
-    coordinator.shutdown();
-    System.out.println("Coordinator closed");
   }
 }
