@@ -45,7 +45,6 @@ public class PaxosServerImpl implements PaxosServer, Server {
     log("Received GET request: " + key);
 
     if (mapStore.containsKey(key)) {
-      log("WITHIN GET" + mapStore.size());
       String response = mapStore.get(key);
       logResponse(response);
       return response;
